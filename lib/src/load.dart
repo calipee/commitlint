@@ -59,7 +59,12 @@ Rule _extractRule(dynamic config) {
   bool isOptional = false;
 
   if (config.length == 3) {
-    value = config.last;
+    if (config.last is bool) {
+      value = config[config.length - 2];
+      isOptional = config.last;
+    } else {
+      value = config.last;
+    }
     // isOptional is not required to be set because it defaults to false
   } else if (config.length == 4) {
     value = config[config.length - 2];
