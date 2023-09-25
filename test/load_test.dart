@@ -20,6 +20,19 @@ void main() {
     expect(config.defaultIgnores, equals(null));
     expect(config.ignores, equals(null));
   });
+  test('only `rules` with optional rules should work', () async {
+    final config = await load('test/__fixtures__/only-rules-with-optional.yaml');
+    expect(config.rules.isEmpty, false);
+    expect(config.rules.keys.length, equals(2));
+    expect(config.rules['subject-full-stop'], isA<ValueRule>());
+    expect(config.rules['type-enum'], isA<EnumRule>());
+    expect((config.rules['subject-full-stop'] as ValueRule).value, ".");
+    expect((config.rules['subject-full-stop'] as ValueRule).isOptional, true);
+    expect((config.rules['type-enum'] as EnumRule).allowed,
+        equals(['feat', 'fix', 'docs', 'chore']));
+    expect(config.defaultIgnores, equals(null));
+    expect(config.ignores, equals(null));
+  });
   test('include relative path should work', () async {
     final config = await load('test/__fixtures__/include-path.yaml');
     expect(config.rules.isEmpty, false);

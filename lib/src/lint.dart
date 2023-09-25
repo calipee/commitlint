@@ -12,7 +12,7 @@ Future<LintOutcome> lint(String message, Map<String, Rule> rules,
     {bool? defaultIgnores, Iterable<String>? ignores}) async {
   /// Found a wildcard match, skip
   if (isIgnored(message, defaultIgnores: defaultIgnores, ignores: ignores)) {
-    return LintOutcome(input: message, valid: true, errors: [], warnings: []);
+    return LintOutcome(input: message, passed: [], valid: true, errors: [], warnings: []);
   }
 
   /// Parse the commit message
@@ -20,7 +20,7 @@ Future<LintOutcome> lint(String message, Map<String, Rule> rules,
 
   if (commit.header.isEmpty && commit.body == null && commit.footer == null) {
     /// Commit is empty, skip
-    return LintOutcome(input: message, valid: true, errors: [], warnings: []);
+    return LintOutcome(input: message, passed: [], valid: true, errors: [], warnings: []);
   }
   final allRules = Map.of(supportedRules);
 
@@ -33,33 +33,34 @@ Future<LintOutcome> lint(String message, Map<String, Rule> rules,
   }
 
   /// Validate against all rules
-  final results = rules.entries
+  final allResults = rules.entries
       // Level 0 rules are ignored
       .where((entry) => entry.value.severity != RuleSeverity.ignore)
       .map((entry) {
-        final name = entry.key;
-        final config = entry.value;
-        final rule = allRules[name];
+    final name = entry.key;
+    final config = entry.value;
+    final rule = allRules[name];
 
-        if (rule == null) {
-          throw Exception('Could not find rule implementation for $name');
-        }
-        final ruleOutcome = rule.call(commit, config);
+    if (rule == null) {
+      throw Exception('Could not find rule implementation for $name');
+    }
+    final ruleOutcome = rule.call(commit, config);
 
-        return LintRuleOutcome(
-          valid: ruleOutcome.valid,
-          level: config.severity,
-          name: name,
-          message: ruleOutcome.message,
-        );
-      })
-      .where((outcome) => !outcome.valid)
-      .toList();
+    return LintRuleOutcome(
+      valid: ruleOutcome.valid,
+      level: config.severity,
+      name: name,
+      message: ruleOutcome.message,
+    );
+  });
+  final erroredRules = allResults.where((outcome) => !outcome.valid).toList();
+  final passed = allResults.where((outcome) => outcome.valid).toList();
   final errors =
-      results.where((element) => element.level == RuleSeverity.error);
+      erroredRules.where((element) => element.level == RuleSeverity.error);
   final warnings =
-      results.where((element) => element.level == RuleSeverity.warning);
+      erroredRules.where((element) => element.level == RuleSeverity.warning);
   return LintOutcome(
+    passed: passed,
     input: message,
     valid: errors.isEmpty,
     errors: errors,

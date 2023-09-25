@@ -46,7 +46,17 @@ RuleFunction fullStopRule(CommitComponent component) {
       throw Exception('$config is not ValueRuleConfig<String>');
     }
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureFullStop(raw, config.value);
+    final componentEmpty = ensureEmpty(raw);
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it would have to end with ${config.value}'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureFullStop(raw, config.value);
     final negated = config.condition == RuleCondition.never;
     return RuleOutcome(
       valid: negated ? !result : result,
@@ -63,7 +73,17 @@ RuleFunction fullStopRule(CommitComponent component) {
 RuleFunction leadingBlankRule(CommitComponent component) {
   return (Commit commit, Rule config) {
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureLeadingBlank(raw);
+    final componentEmpty = ensureEmpty(raw);
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it would have to end with a blank line'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureLeadingBlank(raw);
     final negated = config.condition == RuleCondition.never;
     return RuleOutcome(
       valid: negated ? !result : result,
@@ -97,7 +117,17 @@ RuleFunction caseRule(CommitComponent component) {
       throw Exception('$config is not CaseRuleConfig');
     }
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureCase(raw, config.type);
+    final componentEmpty = ensureEmpty(raw);
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it would have to be ${config.type.caseName}'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureCase(raw, config.type);
     final negated = config.condition == RuleCondition.never;
     return RuleOutcome(
       valid: negated ? !result : result,
@@ -117,8 +147,20 @@ RuleFunction maxLengthRule(CommitComponent component) {
       throw Exception('$config is not LengthRuleConfig');
     }
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureMaxLength(raw, config.length);
+    final componentEmpty = ensureEmpty(raw);
     final negated = config.condition == RuleCondition.never;
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it must',
+          if (negated) 'not',
+          'have ${config.length} or less characters'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureMaxLength(raw, config.length);
     return RuleOutcome(
       valid: negated ? !result : result,
       message: [
@@ -137,8 +179,20 @@ RuleFunction maxLineLengthRule(CommitComponent component) {
       throw Exception('$config is not LengthRuleConfig');
     }
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureMaxLineLength(raw, config.length);
+    final componentEmpty = ensureEmpty(raw);
     final negated = config.condition == RuleCondition.never;
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} its lines must',
+          if (negated) 'not',
+          'have ${config.length} or less characters'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureMaxLineLength(raw, config.length);
     return RuleOutcome(
       valid: negated ? !result : result,
       message: [
@@ -157,8 +211,20 @@ RuleFunction minLengthRule(CommitComponent component) {
       throw Exception('$config is not LengthRuleConfig');
     }
     final raw = commit.componentRaw(component);
-    final result = raw != null && ensureMinLength(raw, config.length);
+    final componentEmpty = ensureEmpty(raw);
     final negated = config.condition == RuleCondition.never;
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it must',
+          if (negated) 'not',
+          'have ${config.length} or more characters'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureMinLength(raw, config.length);
     return RuleOutcome(
       valid: negated ? !result : result,
       message: [
@@ -176,8 +242,20 @@ RuleFunction enumRule(CommitComponent component) {
       throw Exception('$config is not EnumRuleConfig');
     }
     final raw = commit.componentRaw(component);
-    final result = ensureEnum(raw, config.allowed);
+    final componentEmpty = ensureEmpty(raw);
     final negated = config.condition == RuleCondition.never;
+    if (componentEmpty && config.isOptional) {
+      return RuleOutcome(
+        valid: true,
+        message: [
+          '${component.name} is empty but optional and therefore valid.',
+          ' If there was a ${component.name} it must',
+          if (negated) 'not',
+          'be one of ${config.allowed}'
+        ].join(' '),
+      );
+    }
+    final result = !componentEmpty && ensureEnum(raw, config.allowed);
     return RuleOutcome(
       valid: negated ? !result : result,
       message: [

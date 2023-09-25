@@ -16,11 +16,12 @@ enum RuleCondition {
 class Rule {
   final RuleSeverity severity;
   final RuleCondition condition;
+  bool isOptional;
 
-  Rule({
-    required this.severity,
-    required this.condition,
-  });
+  Rule(
+      {required this.severity,
+      required this.condition,
+      this.isOptional = false});
 }
 
 class RuleOutcome {

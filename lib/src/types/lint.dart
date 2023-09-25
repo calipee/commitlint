@@ -8,12 +8,16 @@ class LintOutcome {
   final bool valid;
 
   /// All errors, per rule, for the commit
+  final Iterable<LintRuleOutcome> passed;
+
+  /// All errors, per rule, for the commit
   final Iterable<LintRuleOutcome> errors;
 
   /// All warnings, per rule, for the commit
   final Iterable<LintRuleOutcome> warnings;
 
   LintOutcome({
+    required this.passed,
     required this.input,
     required this.valid,
     required this.errors,

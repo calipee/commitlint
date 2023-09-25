@@ -3,7 +3,7 @@ import 'package:verbose/verbose.dart';
 import 'types/format.dart';
 import 'types/lint.dart';
 
-const _kDefaultSigns = [' ', '⚠', '✖'];
+const _kDefaultSigns = [' ', '⚠', '✖','✓'];
 final _defaultColors = [white, yellow, red];
 
 ///
@@ -37,19 +37,27 @@ List<String> _formatResult(LintOutcome result) {
     final sign = _kDefaultSigns[problem.level.index];
     final color = _defaultColors[problem.level.index];
     final decoration = color(sign);
-    final name = gray(problem.name);
+    final name = color(problem.name);
     return '$decoration  ${problem.message} $name';
   });
-
+  final passedRules = result.passed.map((passedRule) {
+    final sign = '✓';
+    final color = green;
+    final decoration = color(sign);
+    final name = color(passedRule.name);
+    return '$decoration  ${passedRule.message} $name';
+  });
   final sign = _selectSign(result);
   final color = _selectColor(result);
   final decoration = color(sign);
-  final summary = problems.isNotEmpty || Verbose.enabled
+  var summary = problems.isNotEmpty || Verbose.enabled
       ? '$decoration  found ${result.errors.length} error(s), ${result.warnings.length} warning(s)'
       : '';
+  summary += ' ${result.passed.length} rule(s) passed.';
   final fmtSummary = summary.isNotEmpty ? bold(summary) : summary;
   return [
     ...problems,
+    ...passedRules,
     if (problems.isNotEmpty) '',
     fmtSummary.toString(),
     if (problems.isNotEmpty) '',

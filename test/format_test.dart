@@ -13,6 +13,7 @@ void main() {
     final fakeError = LintOutcome(
       input: '',
       valid: false,
+      passed: [],
       errors: [
         LintRuleOutcome(
           valid: false,
@@ -28,6 +29,8 @@ void main() {
       input: '',
       valid: false,
       errors: [],
+      passed: [],
+
       warnings: [
         LintRuleOutcome(
           valid: false,

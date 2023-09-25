@@ -55,6 +55,7 @@ class CommitLintRunner extends CommandRunner {
       }
       results.replaceRange(0, results.length, [
         LintOutcome(
+          passed: [],
           input: input,
           valid: false,
           errors: [

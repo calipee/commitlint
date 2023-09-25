@@ -49,25 +49,32 @@ Rule _extractRule(dynamic config) {
   if (config is! List) {
     throw Exception('rule config must be list, but get $config');
   }
-  if (config.isEmpty || config.length < 2 || config.length > 3) {
+  if (config.isEmpty || config.length < 2 || config.length > 4) {
     throw Exception(
-        'rule config must contain at least two, at most three items.');
+        'rule config must contain at least two, at most four items.');
   }
   final severity = _extractRuleSeverity(config.first as int);
   final condition = _extractRuleCondition(config.elementAt(1) as String);
   dynamic value;
+  bool isOptional = false;
+
   if (config.length == 3) {
     value = config.last;
+    // isOptional is not required to be set because it defaults to false
+  } else if (config.length == 4) {
+    value = config[config.length - 2];
+    isOptional = config.last;
   }
   if (value == null) {
-    return Rule(severity: severity, condition: condition);
+    return Rule(severity: severity, condition: condition)
+      ..isOptional = isOptional;
   }
   if (value is num) {
     return LengthRule(
       severity: severity,
       condition: condition,
       length: value,
-    );
+    )..isOptional = isOptional;
   }
   if (value is String) {
     if (value.endsWith('-case')) {
@@ -75,13 +82,13 @@ Rule _extractRule(dynamic config) {
         severity: severity,
         condition: condition,
         type: _extractCase(value),
-      );
+      )..isOptional = isOptional;
     } else {
       return ValueRule(
         severity: severity,
         condition: condition,
         value: value,
-      );
+      )..isOptional = isOptional;
     }
   }
   if (value is List) {
@@ -89,13 +96,13 @@ Rule _extractRule(dynamic config) {
       severity: severity,
       condition: condition,
       allowed: value.cast(),
-    );
+    )..isOptional = isOptional;
   }
   return ValueRule(
     severity: severity,
     condition: condition,
     value: value,
-  );
+  )..isOptional = isOptional;
 }
 
 RuleSeverity _extractRuleSeverity(int severity) {

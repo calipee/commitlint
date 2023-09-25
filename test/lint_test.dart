@@ -27,6 +27,32 @@ void main() {
     expect(result.valid, true);
   });
 
+  test(
+      'positive on stub message with empty component and adhered rule when rule is optional',
+      () async {
+    final result = await lint('foo:', {
+      'subject-full-stop': ValueRule(
+        severity: RuleSeverity.error,
+        condition: RuleCondition.always,
+        value: '.',
+      )..isOptional = true,
+    });
+    expect(result.valid, true);
+  });
+
+  test(
+      'negative on stub message with empty component and adhered rule when rule is not optional',
+      () async {
+    final result = await lint('foo:', {
+      'subject-full-stop': ValueRule(
+        severity: RuleSeverity.error,
+        condition: RuleCondition.always,
+        value: '.',
+      )..isOptional = false,
+    });
+    expect(result.valid, false);
+  });
+
   test('negative on stub message and broken rule', () async {
     final result = await lint('foo: bar', {
       'type-enum': EnumRule(
